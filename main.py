@@ -40,4 +40,4 @@ def print_bookings():
 
 
 startup()
-print_bookings()
+# print_bookings()
