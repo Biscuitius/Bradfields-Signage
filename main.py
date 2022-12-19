@@ -2,7 +2,7 @@ from classes import Category
 from config import url_codes
 
 categories = []
-resource_list = {}
+resources = {}
 
 
 def startup():
@@ -13,12 +13,12 @@ def startup():
 
 def update():
     for category in categories:
-        resource_list.update(category.update())
+        resources.update(category.update())
 
 
 def print_bookings():
 
-    for resource in resource_list.values():
+    for resource in resources.values():
         print("   ", end="")
         print(resource.name)
 
