@@ -5,8 +5,9 @@ from bs4 import BeautifulSoup
 
 class Resource:
 
-    def __init__(self, name):
+    def __init__(self, name, category):
         self.name = name
+        self.category = category
         self.bookings = {
             "AM": {},
             "Period 1": {},
@@ -20,8 +21,7 @@ class Resource:
 
 class Category:
 
-    def __init__(self, name, urlcode):
-        self.name = name
+    def __init__(self, urlcode):
         self.url = (
             "https://bradfields.roombookingsystem.co.uk/digitalsignage?code="
             + urlcode
@@ -29,7 +29,16 @@ class Category:
 
     def update(self):
 
+        self.resources = []
+        resources = {}
+
         soup = BeautifulSoup(requests.get(self.url).text, "html.parser")
+
+        search = soup.find(class_="greydark largest")
+        search = re.search(r"<b>.+?</b>", str(search), flags=re.DOTALL)
+        search = str(search.group())
+        search = search[3:-4]
+        self.name = search.replace("&amp;", "&")
 
         div_list = soup.find_all(class_="timetableCell")
 
@@ -40,15 +49,25 @@ class Category:
             search = re.findall(r"'.+?'", str(item))
 
             timeslot = search[5].replace("'", "")
+
+            valid_timeslots = [
+                "AM",
+                "Period 1",
+                "Period 2",
+                "Period 3",
+                "Lunch",
+                "Period 4",
+                "Period 5"
+            ]
+
+            if timeslot not in valid_timeslots:
+                raise InvalidTimeSlot(self.name)
+
             resource = search[10].replace("'", "")
 
             if resource != current_resource:
                 current_resource = resource
-                print("\n" + resource)
-
-            print("   " + timeslot)
-
-            bookings = {}
+                resources[resource] = Resource(resource, self)
 
             search = re.search(r'title=".+?"', str(item), flags=re.DOTALL)
 
@@ -75,19 +94,22 @@ class Category:
                     user = user.replace("\xa0", " ")
                     user = user.replace("\r", "")
 
-                    bookings[user] = quantity
+                    resources[resource].bookings[timeslot][user] = quantity
 
-            if len(bookings) == 0:
+            if not resources[resource].bookings[timeslot]:
+                resources[resource].bookings[timeslot] = "None"
 
-                print("      No bookings")
+        self.resources = resources
 
-            else:
+        return resources
 
-                for booking in bookings:
 
-                    print(
-                        "      "
-                        + booking
-                        + ": "
-                        + bookings[booking]
-                    )
+class InvalidTimeSlot(Exception):
+    def __init__(self, category):
+
+        self.message = f"""
+BARBS only works with Period-based timeslots (i.e. AM, Period X, Lunch)
+The category "{category}" doesn't use these.\n
+"""
+
+        super().__init__(self.message)

@@ -1,21 +1,43 @@
-from classes import Category, Resource
+from classes import Category
+from config import url_codes
 
-cat_ict = Category(
-    "ICT",
-    "90486ca55805467b81d465bdb3bc3b58&categoryID=38566")
+categories = []
+resource_list = {}
 
-cat_cameras = Category(
-    "Cameras",
-    "3e4333ba5d8a4071acbd64ca218be245&categoryID=35400")
 
-cat_ipads = Category(
-    "iPads",
-    "d939505748a7491784179b3f1d76acb4&categoryID=35332")
+def startup():
+    for code in url_codes:
+        categories.append(Category(code))
+    update()
 
-laptops = Resource("Laptops")
-ipads = Resource("iPads")
-cameras = Resource("Cameras")
 
-cat_ict.update()
-cat_ipads.update()
-cat_cameras.update()
+def update():
+    for category in categories:
+        resource_list.update(category.update())
+
+
+def print_bookings():
+
+    for resource in resource_list.values():
+        print("   ", end="")
+        print(resource.name)
+
+        for timeslot in resource.bookings:
+            print("\n      ", end="")
+            print(timeslot)
+
+            if resource.bookings[timeslot] == "None":
+                print("         None")
+            else:
+                for booking in resource.bookings[timeslot]:
+                    print("         ", end="")
+                    print(
+                        booking
+                        + ": "
+                        + resource.bookings[timeslot][booking]
+                    )
+        print("\n--------------------------------\n")
+
+
+startup()
+print_bookings()
