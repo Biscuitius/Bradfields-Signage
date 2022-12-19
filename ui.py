@@ -16,14 +16,20 @@ def init_root():
     root.config(padx=10, pady=10)
     root.resizable(False, False)
     root.bind("<F11>", lambda e: toggle_fullscreen(root))
-
+    root.columnconfigure(0, weight=1)
+    root.rowconfigure(0, weight=1)
     return root
 
 
 def init_resources(root, resources):
+
+    ttk.Style().configure("TFrame", background="red")
+
     i = 0
     for resource in resources.values():
-        ttk.Frame(root, style="body").pack()
+
+        ttk.Frame(root).grid(column=i, row=0, sticky="nesw")
+        root.columnconfigure(i, weight=1)
 
         i += 1
 
