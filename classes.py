@@ -42,6 +42,11 @@ class Category:
 
         div_list = soup.find_all(class_="timetableCell")
 
+        if len(div_list) == 0:
+            error_list = soup.find_all("h2")
+            print(error_list)
+            error_occurred = True
+
         current_resource = ""
 
         for item in div_list:
@@ -101,7 +106,10 @@ class Category:
 
         self.resources = resources
 
-        return resources
+        if error_occurred:
+            raise SignageError(str(error_list[0])[4:-5])
+        else:
+            return resources
 
 
 class InvalidTimeSlot(Exception):
@@ -110,6 +118,18 @@ class InvalidTimeSlot(Exception):
         self.message = f"""
 BARBS only works with Period-based timeslots (i.e. AM, Period X, Lunch)
 The category "{category}" doesn't use these.\n
+"""
+
+        super().__init__(self.message)
+
+
+class SignageError(Exception):
+    def __init__(self, message):
+
+        self.message = f"""
+The Room Booking Digital Signage link provided no valid information.
+The following error message was provided by the site:\n
+"{message}"\n
 """
 
         super().__init__(self.message)
