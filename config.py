@@ -1,5 +1,4 @@
-theme = "Bradfields"
-# Themes: Fortis, Bradfields, Generic
+institute_name = "Bradfields Academy"
 url_codes = {
     "90486ca55805467b81d465bdb3bc3b58&categoryID=38566",
     "3e4333ba5d8a4071acbd64ca218be245&categoryID=35400",

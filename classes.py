@@ -46,6 +46,8 @@ class Category:
             error_list = soup.find_all("h2")
             print(error_list)
             error_occurred = True
+        else:
+            error_occurred = False
 
         current_resource = ""
 

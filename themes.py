@@ -1,21 +1,24 @@
 from tkinter import ttk
-from config import theme
+import tkinter.font as tkf
 
 
 def init_theme():
+
+    test_font = ("century gothic", 12, "bold")
+
     theme = ttk.Style()
     theme.configure(style="Root.TFrame", background="purple")
-    theme.configure(style="TableTitle.TLabel", background="red")
-    theme.configure(style="TableCell.TLabel", background="blue")
-    theme.configure(style="MainTitle.TLabel", background="green")
+    theme.configure(
+        style="TableTitle.TLabel",
+        font=test_font,
+        background="red")
+    theme.configure(
+        style="TableCell.TLabel",
+        font=test_font,
+        background="blue")
+    theme.configure(
+        style="MainTitle.TLabel",
+        font=test_font,
+        background="green")
+
     return theme
-
-
-class Theme():
-    def __init__(self, name):
-        self.name = name
-
-
-Fortis_Theme = {
-    "MainTitle"
-}

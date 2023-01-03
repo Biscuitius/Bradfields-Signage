@@ -1,5 +1,5 @@
 ExamplePages/
-.vscode
-__pycache__
+.vscode/
+__pycache__/
 hex_codes.py
 *.pyc
