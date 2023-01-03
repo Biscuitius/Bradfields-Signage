@@ -36,48 +36,53 @@ def auto_resize_text(theme, widget_list):
 
     widget_list.pop(0)  # Remove Title label (handled seperately)
 
-    parent_width = root_frame.winfo_width()
-    min_width = int((parent_width / 100) * 90)
-    max_width = int((parent_width / 100) * 95)
-    child_width = title.winfo_reqwidth()
+    """
+    THE PROBLEM WITH THIS SECTION IS THAT IT'S MEASURING THE LABEL, NOT THE TEXT
+    PROBABLY NEED TO LOOK INTO TK FONTS TO MEASURE TEXT
+    """
 
-    print("Parent Width: " + str(parent_width))
-    print("Child Width: " + str(child_width))
-    print("Min Width: " + str(min_width))
-    print("Max Width: " + str(max_width))
+    # parent_width = root_frame.winfo_width()
+    # min_width = int((parent_width / 100) * 90)
+    # max_width = int((parent_width / 100) * 95)
+    # child_width = title.winfo_reqwidth()
 
-    if child_width == 0:
-        pass
+    # print("Parent Width: " + str(parent_width))
+    # print("Child Width: " + str(child_width))
+    # print("Min Width: " + str(min_width))
+    # print("Max Width: " + str(max_width))
 
-    elif child_width < min_width or child_width > max_width:
+    # if child_width == 0:
+    #     pass
 
-        style = title.cget("style")
-        font = get_font_tuple(style)
-        font_family = font[0]
-        font_size = font[1]
-        font_weight = font[2]
+    # elif child_width < min_width or child_width > max_width:
 
-        while child_width < max_width:
+    #     style = title.cget("style")
+    #     font = get_font_tuple(style)
+    #     font_family = font[0]
+    #     font_size = font[1]
+    #     font_weight = font[2]
 
-            font_size += 4
-            theme.configure(style, font=(font_family, font_size, font_weight))
-            root_frame.update()
-            child_width = title.winfo_width()
-            print(child_width)
+    #     while child_width < max_width:
 
-            print(f"Increasing font size to {str(font_size)}...")
-            time.sleep(0.5)
+    #         font_size += 4
+    #         theme.configure(style, font=(font_family, font_size, font_weight))
+    #         root_frame.update()
+    #         child_width = title.winfo_width()
+    #         print(child_width)
 
-        while child_width > max_width:
+    #         print(f"Increasing font size to {str(font_size)}...")
+    #         time.sleep(0.5)
 
-            font_size -= 4
-            theme.configure(style, font=(font_family, font_size, font_weight))
-            root_frame.update()
-            child_width = title.winfo_width()
-            print(child_width)
+    #     while child_width > max_width:
 
-            print(f"Decreasing font size to {str(font_size)}...")
-            time.sleep(0.5)
+    #         font_size -= 4
+    #         theme.configure(style, font=(font_family, font_size, font_weight))
+    #         root_frame.update()
+    #         child_width = title.winfo_width()
+    #         print(child_width)
+
+    #         print(f"Decreasing font size to {str(font_size)}...")
+    #         time.sleep(0.5)
 
     resizing = False
 
