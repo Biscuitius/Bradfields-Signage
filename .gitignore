@@ -1,3 +1,3 @@
-dir_to_ignore/
+ExamplePages/
 hex_codes.py
 *.pyc
