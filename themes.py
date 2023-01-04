@@ -2,23 +2,59 @@ from tkinter import ttk
 import tkinter.font as tkf
 
 
-def init_theme():
+def init_fonts(root):
 
-    test_font = ("century gothic", 12, "bold")
+    fonts = {
+
+        "main_title_font": tkf.Font(
+            root=root,
+            font=None,
+            name="main_title_font",
+            exists=False,
+            family="century gothic",
+            size=16,
+            weight="bold"
+        ),
+
+        "cell_title_font": tkf.Font(
+            root=root,
+            font=None,
+            name="cell_title_font",
+            exists=False,
+            family="century gothic",
+            size=12,
+            weight="bold"
+        ),
+
+        "cell_font": tkf.Font(
+            root=root,
+            font=None,
+            name="cell_font",
+            exists=False,
+            family="century gothic",
+            size=12,
+            weight="normal"
+        )
+    }
+
+    return fonts
+
+
+def init_theme(fonts):
 
     theme = ttk.Style()
     theme.configure(style="Root.TFrame", background="purple")
     theme.configure(
         style="TableTitle.TLabel",
-        font=test_font,
+        font=fonts["cell_title_font"],
         background="red")
     theme.configure(
         style="TableCell.TLabel",
-        font=test_font,
+        font=fonts["cell_font"],
         background="blue")
     theme.configure(
         style="MainTitle.TLabel",
-        font=test_font,
+        font=fonts["main_title_font"],
         background="green")
 
     return theme
