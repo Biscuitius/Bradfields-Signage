@@ -3,8 +3,9 @@ import tkinter as tk
 import tkinter.font as tkf
 import config
 import time
-from tkinter import ttk
 from main import resources
+
+resizing = False
 
 
 def toggle_fullscreen(event=None):
@@ -14,114 +15,75 @@ def toggle_fullscreen(event=None):
     return "break"
 
 
-def expand_font(fonts, font, font_size, min_height, max_height, text_height, step_size):
-    """
-    Increase font size until the text is bigger than the label
-    """
-    while text_height < max_height:
-        font_size += step_size
-        fonts[font].config(size=font_size)
-        text_height = fonts["main_title_font"].metrics("linespace")
-        print(f"Increasing font size to {str(font_size)}...")
+def adjust_font(font, min_height, max_height, text_height, step_size):
 
-    """
-    The loop above stops when the text steps over the max size,
-    this bit pushes it one step back
-    """
-    fonts[font].config(size=(font_size-step_size))
-    text_height = fonts["main_title_font"].metrics("linespace")
+    old_size = font.cget("size")
 
-    if text_height < min_height and text_height > max_height:
-        return False
+    if text_height < min_height:
+        print("Font too small, expanding...")
+        new_size = old_size + step_size
     else:
+        print("Font too big, shrinking...")
+        new_size = old_size - step_size
+
+    font.config(size=new_size)
+    text_height = font.metrics("linespace")
+    print("Changing font size to " + str(new_size))
+
+    if text_height > min_height and text_height < max_height:
+        print("Perfect size found")
         return True
-
-
-def shrink_font(fonts, font, font_size, min_height, max_height, text_height, step_size):
-    """
-    Decrease font size until the text is smaller than the label
-    """
-    while text_height > max_height:
-        font_size -= step_size
-        fonts[font].config(size=font_size)
-        text_height = fonts["main_title_font"].metrics("linespace")
-        print(f"Decreasing font size to {str(font_size)}...")
-
-    if text_height < min_height and text_height > max_height:
-        return False
     else:
-        return True
+        print("Perfect size not found, trying again...")
+        return False
 
 
-def auto_resize(main_root, title_frame, table_frame, fonts):
+def autofit(label):
+
+    print("Checking if text needs fitting...")
 
     global resizing
     resizing = True
 
-    title = title_frame.winfo_children()[0]
+    font = label.cget("font")
+    font = fonts("font")
 
-    main_root.update()
+    label_frame = main_root.nametowidget(label.winfo_parent())
 
-    root_height = main_root.winfo_reqheight()
+    label_height = label_frame.winfo_height()
+    min_height = int((label_height / 100) * 85)
+    max_height = int((label_height / 100) * 95)
+    text_height = font.metrics("linespace")
 
-    def resize_title():
+    if text_height < min_height or text_height > max_height:
 
-        title_frame_height = int(root_height / 7)
+        print("Font needs to be fitted:")
+        print("    Label Height: " + str(label_height))
+        print("    Text Height: " + str(text_height))
+        print("    Min Height: " + str(min_height))
+        print("    Max Height: " + str(max_height))
 
-        title_frame.configure(height=title_frame_height)
+        sweet_spot_found = False
+        step_size = 1
+        start_time = time.time()
 
-        main_root.update()
+        print("Beginning resize...")
 
-        min_height = int((title_frame_height / 100) * 70)
-        max_height = int((title_frame_height / 100) * 95)
-        text_height = fonts["main_title_font"].metrics("linespace")
+        while not sweet_spot_found:
 
-        print("Frame Height: " + str(title_frame_height))
-        print("Text Height: " + str(text_height))
-        print("Min Height: " + str(min_height))
-        print("Max Height: " + str(max_height))
+            sweet_spot_found = adjust_font(
+                font,
+                min_height,
+                max_height,
+                text_height,
+                step_size
+            )
 
-        if text_height < min_height or text_height > max_height:
+        execution_time = time.time() - start_time
 
-            """ Get current font settings """
-            font = title.cget("font")
-            font_size = fonts[font].cget("size")
-
-            sweet_spot_found = False
-            step_size = 5
-            start_time = time.time()
-
-            while not sweet_spot_found:
-
-                if text_height < min_height:
-                    sweet_spot_found = expand_font(
-                        fonts,
-                        font,
-                        font_size,
-                        min_height,
-                        max_height,
-                        text_height,
-                        step_size
-                    )
-
-                if text_height > max_height:
-                    sweet_spot_found = shrink_font(
-                        fonts,
-                        font,
-                        font_size,
-                        min_height,
-                        max_height,
-                        text_height,
-                        step_size
-                    )
-
-                step_size -= 1
-
-            execution_time = time.time() - start_time
-
-            print(execution_time)
-
-    resize_title()
+        print("Resizing finished, took " + str(execution_time))
+    else:
+        print("Text doesn't need refitting.")
 
     resizing = False
 
@@ -131,66 +93,78 @@ def init_root():
     main_root = tk.Tk()
     main_root.title("BARBS.EXE")
     main_root.attributes("-fullscreen", True)
-    main_root.configure(background="purple")
+    main_root.configure(bg=themes.root_colour)
     main_root.bind("<F11>", lambda e: toggle_fullscreen(main_root))
-    root_frame = ttk.Frame(style="Root.TFrame")
+    root_frame = tk.Frame()
     root_frame.pack(fill="both", expand=True, padx=8, pady=8)
 
     return root_frame
 
 
-def init_title(root_frame, fonts):
+def init_title(root_frame):
 
     title_frame = tk.Frame(master=root_frame)
-
-    title_frame.grid(column=0, row=0, sticky="new")
+    title_frame.pack_propagate(0)
+    title_frame.pack(fill="both", expand=True)
 
     title = tk.Label(
         master=title_frame,
-        font=fonts["main_title_font"],
+        bg=themes.main_title_colour,
+        font=fonts["main_title"],
         text=config.institute_name + " Room Booking",
         anchor="center")
 
-    title.pack(fill="both")
+    title.pack(fill="both", expand=True)
 
-    root_frame.rowconfigure(0, weight=1)
-
-    return title_frame
+    return title
 
 
 def init_table(root_frame, resource_names, timeslots):
 
+    print("Initialising table...")
+
     table_frame = tk.Frame(root_frame)
-    table_frame.grid(column=0, row=1, sticky="nesw")
+    table_frame.pack(fill="both", expand=True)
+    table_frame.rowconfigure(0, weight=1)
+    table_frame.columnconfigure(0, weight=1)
 
     def init_timeslots():
 
-        ttk.Label(
-            master=table_frame,
-            style="TableTitle.TLabel",
-            text="Time Slot",
-            anchor="center"
-        ).grid(
+        print("Initialising timeslots...")
+        frame = tk.Frame(master=table_frame)
+
+        frame.grid(
             column=0,
             row=0,
             sticky="nesw")
 
-        table_frame.rowconfigure(1, weight=1)
+        tk.Label(
+            master=frame,
+            bg=themes.cell_title_colour,
+            font=fonts["cell_title"],
+            text="Time Slot",
+            anchor="center"
+        ).pack(fill="both", expand=True)
 
         timeslot_coords = {}
         count = 1
 
         for timeslot in timeslots:
 
-            ttk.Label(
-                master=table_frame,
-                style="TableCell.TLabel",
-                text=timeslot,
-                anchor="center"
-            ).grid(
+            frame = tk.Frame(master=table_frame)
+
+            frame.grid(
                 column=0,
                 row=count,
                 sticky="nesw")
+
+            tk.Label(
+                master=frame,
+                bg=themes.cell_title_colour,
+                font=fonts["cell_title"],
+                text=timeslot,
+                anchor="center"
+            ).pack(fill="both", expand=True)
 
             table_frame.rowconfigure(count, weight=1)
 
@@ -198,58 +172,75 @@ def init_table(root_frame, resource_names, timeslots):
 
             count += 1
 
-        table_frame.columnconfigure(0, weight=1)
+        print("Finished initialising timeslots.")
 
         return timeslot_coords
 
     def init_resource_tables():
 
+        print("Initialising resources...")
+
         resource_coords = {}
-        count = 0
+        count = 1
 
         for resource in resource_names:
 
-            ttk.Label(
-                master=table_frame,
-                text=resource,
-                style="TableTitle.TLabel",
-                anchor="center"
-            ).grid(
+            table_frame.columnconfigure(count, weight=1)
+
+            frame = tk.Frame(master=table_frame)
+
+            frame.grid(
                 column=count,
-                row=1,
+                row=0,
                 sticky="nesw")
 
-            table_frame.columnconfigure(count, weight=1)
+            tk.Label(
+                master=frame,
+                text=resource,
+                bg=themes.cell_colour,
+                font=fonts["cell"],
+                anchor="center"
+            ).pack(fill="both", expand=True)
 
             resource_coords[resource] = count
 
             count += 1
+
+        print("Finished initialising resources.")
 
         return resource_coords
 
     timeslot_coords = init_timeslots()
     resource_coords = init_resource_tables()
 
+    print("Finished initialising table.")
+
     return table_frame, timeslot_coords, resource_coords
 
 
 def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
 
+    print("Initialising bookings...")
+
     for resource in resources.values():
+
         for timeslot in resource.bookings:
+
+            column = resource_coords[resource.name]
+            row = timeslot_coords[timeslot]
+
+            frame = tk.Frame(master=table_frame)
+            frame.grid(column=column, row=row, sticky="nesw")
 
             if resource.bookings[timeslot] == "None":
 
-                ttk.Label(
-                    master=table_frame,
+                tk.Label(
+                    master=frame,
                     text="None",
-                    style="TableCell.TLabel",
+                    bg=themes.cell_colour,
+                    font=fonts["cell"],
                     anchor="center"
-                ).grid(
-                    column=resource_coords[resource.name],
-                    row=timeslot_coords[timeslot],
-                    sticky="nesw"
-                )
+                ).pack(fill="both", expand=True)
 
             else:
 
@@ -262,29 +253,100 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
                     for booking in resource.bookings[timeslot]
                 ])
 
-                ttk.Label(
-                    master=table_frame,
+                tk.Label(
+                    master=frame,
                     text=cell_contents,
-                    style="TableCell.TLabel",
+                    bg=themes.cell_colour,
+                    font=fonts["cell"],
                     anchor="center"
-                ).grid(
-                    column=resource_coords[resource.name],
-                    row=timeslot_coords[timeslot],
-                    sticky="nesw"
-                )
+                ).pack(fill="both", expand=True)
+
+    print("Finished initialising bookings.")
+
+
+def find_frames_in_frame(frame):
+
+    frames = []
+
+    for widget in frame.winfo_children():
+        if (
+            type(widget) == "tkinter.tk.Frame"
+        ) or (
+            type(widget) == "tkinter.tk.Frame"
+        ):
+            frames.append(widget)
+
+    return frames
+
+
+def find_widgets_recursive(parent):
+
+    unsearched_frames = [parent]
+    widgets = {
+        "frame": [],
+        "label": []
+    }
+
+    while len(unsearched_frames) != 0:
+
+        frame = unsearched_frames[0]
+        unsearched_frames.pop(0)
+
+        children = frame.winfo_children()
+
+        for widget in children:
+
+            if (
+                isinstance(widget, tk.Frame)
+            ) or (
+                isinstance(widget, tk.Frame)
+            ):
+                widgets["frame"].append(widget)
+                unsearched_frames.append(widget)
+
+            elif (
+                isinstance(widget, tk.Label)
+            ) or (
+                isinstance(widget, tk.Label)
+            ):
+                widgets["label"].append(widget)
+
+    return widgets
+
+
+def init_resizing(main_root, title):
+
+    print("Initialising automatic font resizing...")
+
+    widgets = find_widgets_recursive(main_root)
+
+    label_list = widgets["label"]
+
+    for label in label_list:
+
+        if label == title:
+
+            label.bind(
+                "<Configure>",
+                lambda e: None if resizing else autofit(
+                    label)
+            )
+
+    print("Finished initialising automatic font resizing.")
 
 
 def main():
 
+    print("Starting intialisation...")
+    global fonts
+
     resource_names = [resource for resource in resources]
 
-    resizing = False
     root_frame = init_root()
 
-    fonts = themes.init_fonts(root_frame)
-    theme = themes.init_theme(fonts)
+    fonts = themes.init_fonts()
 
-    title_frame = init_title(root_frame, fonts)
+    title = init_title(root_frame)
 
     timeslots = [
         "AM",
@@ -302,12 +364,13 @@ def main():
 
     init_bookings(table_frame, resources, timeslot_coords, resource_coords)
 
-    main_root.bind('<Configure>', lambda e: None if resizing else auto_resize(
-        main_root,
-        title_frame,
-        table_frame,
-        fonts
-    ))
+    main_root.update()
+
+    init_resizing(main_root, title)
+
+    main_root.update()
+
+    print("Finished initialisation.")
 
     main_root.mainloop()
 

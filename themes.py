@@ -1,60 +1,40 @@
-from tkinter import ttk
 import tkinter.font as tkf
 
+root_colour = "red"
+main_title_colour = "orange"
+cell_title_colour = "yellow"
+cell_colour = "green"
+text_colour = "black"
 
-def init_fonts(root):
 
+def init_fonts():
     fonts = {
-
-        "main_title_font": tkf.Font(
-            root=root,
+        "main_title": tkf.Font(
+            root=None,
             font=None,
-            name="main_title_font",
+            name="main_title",
             exists=False,
             family="century gothic",
             size=16,
-            weight="bold"
-        ),
+            weight="bold"),
 
-        "cell_title_font": tkf.Font(
-            root=root,
+        "cell_title": tkf.Font(
+            root=None,
             font=None,
-            name="cell_title_font",
+            name="cell_title",
             exists=False,
             family="century gothic",
             size=12,
-            weight="bold"
-        ),
+            weight="bold"),
 
-        "cell_font": tkf.Font(
-            root=root,
+        "cell": tkf.Font(
+            root=None,
             font=None,
-            name="cell_font",
+            name="cell",
             exists=False,
             family="century gothic",
             size=12,
-            weight="normal"
-        )
+            weight="normal")
     }
 
     return fonts
-
-
-def init_theme(fonts):
-
-    theme = ttk.Style()
-    theme.configure(style="Root.TFrame", background="purple")
-    theme.configure(
-        style="TableTitle.TLabel",
-        font=fonts["cell_title_font"],
-        background="red")
-    theme.configure(
-        style="TableCell.TLabel",
-        font=fonts["cell_font"],
-        background="blue")
-    theme.configure(
-        style="MainTitle.TLabel",
-        font=fonts["main_title_font"],
-        background="green")
-
-    return theme
