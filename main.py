@@ -16,27 +16,27 @@ def update():
         resources.update(category.update())
 
 
-def print_bookings():
+# def print_bookings():
 
-    for resource in resources.values():
-        print("   ", end="")
-        print(resource.name)
+#     for resource in resources.values():
+#         print("   ", end="")
+#         print(resource.name)
 
-        for timeslot in resource.bookings:
-            print("\n      ", end="")
-            print(timeslot)
+#         for timeslot in resource.bookings:
+#             print("\n      ", end="")
+#             print(timeslot)
 
-            if resource.bookings[timeslot] == "None":
-                print("         None")
-            else:
-                for booking in resource.bookings[timeslot]:
-                    print("         ", end="")
-                    print(
-                        booking
-                        + ": "
-                        + resource.bookings[timeslot][booking]
-                    )
-        print("\n--------------------------------\n")
+#             if resource.bookings[timeslot] == "None":
+#                 print("         None")
+#             else:
+#                 for booking in resource.bookings[timeslot]:
+#                     print("         ", end="")
+#                     print(
+#                         booking
+#                         + ": "
+#                         + resource.bookings[timeslot][booking]
+#                     )
+#         print("\n--------------------------------\n")
 
 
 startup()

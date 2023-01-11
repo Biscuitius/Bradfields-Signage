@@ -14,6 +14,7 @@ def toggle_fullscreen(event=None):
 
 
 def init_root():
+
     global main_root
     main_root = tk.Tk()
     main_root.title("BARBS.EXE")
@@ -24,8 +25,8 @@ def init_root():
     root_frame.pack(
         fill="both",
         expand=True,
-        padx=cfg.root_pad_x,
-        pady=cfg.root_pad_y)
+        padx=cfg.root_pad,
+        pady=cfg.root_pad)
 
     return root_frame
 
@@ -34,12 +35,11 @@ def init_title(root_frame):
 
     title_frame = tk.Frame(
         master=root_frame,
-        bg=cfg.root_colour)
+        bg=cfg.table_frame_colour)
     title_frame.pack(
         fill="both",
         expand=True,
-        padx=cfg.title_pad_x,
-        pady=cfg.title_pad_y)
+        pady=(0, cfg.root_pad))
 
     title = tk.Label(
         master=title_frame,
@@ -49,7 +49,11 @@ def init_title(root_frame):
         text=cfg.institute_name + " Room Booking",
         anchor="center")
 
-    title.pack(fill="both", expand=True)
+    title.pack(
+        fill="both",
+        expand=True,
+        padx=cfg.title_pad,
+        pady=cfg.title_pad)
 
     return title
 
@@ -70,10 +74,10 @@ def init_table(root_frame, resource_names, timeslots):
     table_frame.pack(
         fill="both",
         expand=True,
-        padx=cfg.table_pad_x,
-        pady=cfg.table_pad_y)
-    table_frame.rowconfigure(0, weight=0)
-    table_frame.columnconfigure(0, weight=0)
+        padx=cfg.frame_pad,
+        pady=cfg.frame_pad)
+    table_frame.rowconfigure(0, weight=cfg.cell_title_weight)
+    table_frame.columnconfigure(0, weight=cfg.cell_title_weight)
 
     def init_timeslots():
 
@@ -91,13 +95,11 @@ def init_table(root_frame, resource_names, timeslots):
             bg=cfg.cell_title_colour,
             fg=cfg.cell_title_text_colour,
             font=fonts["cell_title"],
-            text="Time Slot",
+            text="",
             anchor="center"
         ).pack(
             fill="both",
-            expand=True,
-            padx=cfg.cell_pad_x,
-            pady=cfg.cell_pad_y)
+            expand=True)
 
         timeslot_coords = {}
         count = 1
@@ -121,11 +123,9 @@ def init_table(root_frame, resource_names, timeslots):
                 anchor="center"
             ).pack(
                 fill="both",
-                expand=True,
-                padx=cfg.cell_pad_x,
-                pady=cfg.cell_pad_y)
+                expand=True)
 
-            table_frame.rowconfigure(count, weight=1)
+            table_frame.rowconfigure(count, weight=cfg.cell_weight)
 
             timeslot_coords[timeslot] = count
 
@@ -144,7 +144,7 @@ def init_table(root_frame, resource_names, timeslots):
 
         for resource in resource_names:
 
-            table_frame.columnconfigure(count, weight=1)
+            table_frame.columnconfigure(count, weight=cfg.cell_weight)
 
             frame = tk.Frame(
                 master=table_frame,
@@ -163,9 +163,7 @@ def init_table(root_frame, resource_names, timeslots):
                 anchor="center"
             ).pack(
                 fill="both",
-                expand=True,
-                padx=cfg.cell_pad_x,
-                pady=cfg.cell_pad_y)
+                expand=True)
 
             resource_coords[resource] = count
 
@@ -204,14 +202,12 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
                 booking = tk.Label(
                     master=frame,
                     text="None",
-                    fg=cfg.cell_text_colour,
+                    fg=cfg.empty_text_colour,
                     font=fonts["cell"],
                     anchor="center")
                 booking.pack(
                     fill="both",
-                    expand=True,
-                    padx=cfg.cell_pad_x,
-                    pady=cfg.cell_pad_y)
+                    expand=True)
 
             else:
 
@@ -227,21 +223,74 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
                 booking = tk.Label(
                     master=frame,
                     text=cell_contents,
-                    fg=cfg.cell_text_colour,
+                    fg=cfg.booking_text_colour,
                     font=fonts["cell"],
                     anchor="center")
                 booking.pack(
                     fill="both",
-                    expand=True,
-                    padx=cfg.cell_pad_x,
-                    pady=cfg.cell_pad_y)
+                    expand=True)
 
-            if row == 2 or row == 4 or row == 6:
+            """ Make every 2nd row a different colour """
+            if row % 2 == 0:
                 booking.configure(bg=cfg.cell_colour2)
             else:
                 booking.configure(bg=cfg.cell_colour1)
 
     print("Finished initialising bookings.")
+
+
+def add_table_gridlines(table_frame, timeslot_coords, resource_coords):
+    if cfg.cell_spacing_vertical < 1 and cfg.cell_spacing_horizontal < 1:
+        pass
+    else:
+        last_row = len(list(timeslot_coords.values()))
+        last_column = len(list(resource_coords.values()))
+
+        """ Get all cells (including title cells) in the table """
+        cell_list = table_frame.winfo_children()
+
+        for cell in cell_list:
+            info = cell.grid_info()
+            row = info["row"]
+            column = info["column"]
+
+            if row % 2 == 1:
+
+                if row == last_row:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        pady=(cfg.cell_spacing_vertical, 0))
+                else:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        pady=cfg.cell_spacing_vertical)
+
+            elif row == last_row:
+                cell.grid(
+                    row=row,
+                    column=column,
+                    pady=(cfg.cell_spacing_vertical, 0))
+
+            if column % 2 == 1:
+
+                if column == last_column:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        padx=(cfg.cell_spacing_horizontal, 0))
+                else:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        padx=cfg.cell_spacing_horizontal)
+
+            elif column == last_column:
+                cell.grid(
+                    row=row,
+                    column=column,
+                    padx=(cfg.cell_spacing_horizontal, 0))
 
 
 def main():
@@ -255,7 +304,7 @@ def main():
 
     fonts = cfg.init_fonts()
 
-    title = init_title(root_frame)
+    init_title(root_frame)
 
     timeslots = [
         "AM",
@@ -272,6 +321,8 @@ def main():
     resource_coords = table[2]
 
     init_bookings(table_frame, resources, timeslot_coords, resource_coords)
+
+    add_table_gridlines(table_frame, timeslot_coords, resource_coords)
 
     print("Finished initialisation.")
 

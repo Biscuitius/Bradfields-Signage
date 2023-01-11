@@ -12,28 +12,28 @@ url_codes = {
 
 """================= GUI THEME CONFIG ================="""
 
-root_colour = "#D5E0ED"
-main_title_colour = "#84B8D8"
+root_colour = "#DDDDDD"
+main_title_colour = "#FFFFFF"
 table_frame_colour = "#FFFFFF"
-cell_title_colour = "#D5E0ED"
-cell_colour1 = "#ECECEC"
-cell_colour2 = "#F7F7F7"
+cell_title_colour = "#75A9D1"
+cell_colour1 = "#FCFCFC"
+cell_colour2 = "#F3F3F3"
 
 font_family = "century gothic"
-main_title_text_colour = "#FFFFFF"
-cell_title_text_colour = "#3165A5"
-cell_text_colour = "#000000"
+main_title_text_colour = "#444444"
+cell_title_text_colour = "#FFFFFF"
+booking_text_colour = "#444444"
+empty_text_colour = "#666666"
 
 """================= GUI SCALE CONFIG ================="""
 
-cell_pad_x = 1
-cell_pad_y = 1
-title_pad_x = 1
-title_pad_y = (1, 7)
-root_pad_x = 7
-root_pad_y = 7
-table_pad_x = 1
-table_pad_y = 1
+root_pad = 7
+frame_pad = 0
+title_pad = 2
+cell_weight = 3
+cell_title_weight = 1
+cell_spacing_vertical = 2
+cell_spacing_horizontal = 2
 
 
 """================= GUI FONTS CONFIG ================="""
@@ -47,7 +47,7 @@ def init_fonts():
             name="main_title",
             exists=False,
             family="century gothic",
-            size=8,
+            size=24,
             weight="bold"),
 
         "cell_title": tkf.Font(
@@ -56,7 +56,7 @@ def init_fonts():
             name="cell_title",
             exists=False,
             family="century gothic",
-            size=8,
+            size=12,
             weight="bold"),
 
         "cell": tkf.Font(
