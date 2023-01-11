@@ -15,79 +15,6 @@ def toggle_fullscreen(event=None):
     return "break"
 
 
-def adjust_font(font, min_height, max_height, text_height, step_size):
-
-    old_size = font.cget("size")
-
-    if text_height < min_height:
-        print("Font too small, expanding...")
-        new_size = old_size + step_size
-    else:
-        print("Font too big, shrinking...")
-        new_size = old_size - step_size
-
-    font.config(size=new_size)
-    text_height = font.metrics("linespace")
-    print("Changing font size to " + str(new_size))
-
-    if text_height > min_height and text_height < max_height:
-        print("Perfect size found")
-        return True
-    else:
-        print("Perfect size not found, trying again...")
-        return False
-
-
-def autofit(label):
-
-    print("Checking if text needs fitting...")
-
-    global resizing
-    resizing = True
-
-    font = label.cget("font")
-    font = fonts("font")
-
-    label_frame = main_root.nametowidget(label.winfo_parent())
-
-    label_height = label_frame.winfo_height()
-    min_height = int((label_height / 100) * 85)
-    max_height = int((label_height / 100) * 95)
-    text_height = font.metrics("linespace")
-
-    if text_height < min_height or text_height > max_height:
-
-        print("Font needs to be fitted:")
-        print("    Label Height: " + str(label_height))
-        print("    Text Height: " + str(text_height))
-        print("    Min Height: " + str(min_height))
-        print("    Max Height: " + str(max_height))
-
-        sweet_spot_found = False
-        step_size = 1
-        start_time = time.time()
-
-        print("Beginning resize...")
-
-        while not sweet_spot_found:
-
-            sweet_spot_found = adjust_font(
-                font,
-                min_height,
-                max_height,
-                text_height,
-                step_size
-            )
-
-        execution_time = time.time() - start_time
-
-        print("Resizing finished, took " + str(execution_time))
-    else:
-        print("Text doesn't need refitting.")
-
-    resizing = False
-
-
 def init_root():
     global main_root
     main_root = tk.Tk()
@@ -104,7 +31,6 @@ def init_root():
 def init_title(root_frame):
 
     title_frame = tk.Frame(master=root_frame)
-    title_frame.pack_propagate(0)
     title_frame.pack(fill="both", expand=True)
 
     title = tk.Label(
@@ -264,77 +190,6 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
     print("Finished initialising bookings.")
 
 
-def find_frames_in_frame(frame):
-
-    frames = []
-
-    for widget in frame.winfo_children():
-        if (
-            type(widget) == "tkinter.tk.Frame"
-        ) or (
-            type(widget) == "tkinter.tk.Frame"
-        ):
-            frames.append(widget)
-
-    return frames
-
-
-def find_widgets_recursive(parent):
-
-    unsearched_frames = [parent]
-    widgets = {
-        "frame": [],
-        "label": []
-    }
-
-    while len(unsearched_frames) != 0:
-
-        frame = unsearched_frames[0]
-        unsearched_frames.pop(0)
-
-        children = frame.winfo_children()
-
-        for widget in children:
-
-            if (
-                isinstance(widget, tk.Frame)
-            ) or (
-                isinstance(widget, tk.Frame)
-            ):
-                widgets["frame"].append(widget)
-                unsearched_frames.append(widget)
-
-            elif (
-                isinstance(widget, tk.Label)
-            ) or (
-                isinstance(widget, tk.Label)
-            ):
-                widgets["label"].append(widget)
-
-    return widgets
-
-
-def init_resizing(main_root, title):
-
-    print("Initialising automatic font resizing...")
-
-    widgets = find_widgets_recursive(main_root)
-
-    label_list = widgets["label"]
-
-    for label in label_list:
-
-        if label == title:
-
-            label.bind(
-                "<Configure>",
-                lambda e: None if resizing else autofit(
-                    label)
-            )
-
-    print("Finished initialising automatic font resizing.")
-
-
 def main():
 
     print("Starting intialisation...")
@@ -363,12 +218,6 @@ def main():
     resource_coords = table[2]
 
     init_bookings(table_frame, resources, timeslot_coords, resource_coords)
-
-    main_root.update()
-
-    init_resizing(main_root, title)
-
-    main_root.update()
 
     print("Finished initialisation.")
 

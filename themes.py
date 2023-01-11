@@ -15,7 +15,7 @@ def init_fonts():
             name="main_title",
             exists=False,
             family="century gothic",
-            size=16,
+            size=8,
             weight="bold"),
 
         "cell_title": tkf.Font(
@@ -24,7 +24,7 @@ def init_fonts():
             name="cell_title",
             exists=False,
             family="century gothic",
-            size=12,
+            size=8,
             weight="bold"),
 
         "cell": tkf.Font(
@@ -33,7 +33,7 @@ def init_fonts():
             name="cell",
             exists=False,
             family="century gothic",
-            size=12,
+            size=8,
             weight="normal")
     }
 
