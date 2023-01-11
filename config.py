@@ -32,8 +32,9 @@ frame_pad = 0
 title_pad = 2
 cell_weight = 3
 cell_title_weight = 1
-cell_spacing_vertical = 2
+cell_spacing_vertical = 0
 cell_spacing_horizontal = 2
+cell_title_spacing = False
 
 
 """================= GUI FONTS CONFIG ================="""

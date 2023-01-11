@@ -255,7 +255,6 @@ def add_table_gridlines(table_frame, timeslot_coords, resource_coords):
             column = info["column"]
 
             if row % 2 == 1:
-
                 if row == last_row:
                     cell.grid(
                         row=row,
@@ -267,14 +266,7 @@ def add_table_gridlines(table_frame, timeslot_coords, resource_coords):
                         column=column,
                         pady=cfg.cell_spacing_vertical)
 
-            elif row == last_row:
-                cell.grid(
-                    row=row,
-                    column=column,
-                    pady=(cfg.cell_spacing_vertical, 0))
-
             if column % 2 == 1:
-
                 if column == last_column:
                     cell.grid(
                         row=row,
@@ -285,12 +277,6 @@ def add_table_gridlines(table_frame, timeslot_coords, resource_coords):
                         row=row,
                         column=column,
                         padx=cfg.cell_spacing_horizontal)
-
-            elif column == last_column:
-                cell.grid(
-                    row=row,
-                    column=column,
-                    padx=(cfg.cell_spacing_horizontal, 0))
 
 
 def main():
