@@ -3,3 +3,4 @@ ExamplePages/
 __pycache__/
 hex_codes.py
 *.pyc
+test.py
