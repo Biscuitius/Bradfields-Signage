@@ -1,8 +1,6 @@
-import themes
 import tkinter as tk
 import tkinter.font as tkf
-import config
-import time
+import config as cfg
 from main import resources
 
 resizing = False
@@ -20,24 +18,35 @@ def init_root():
     main_root = tk.Tk()
     main_root.title("BARBS.EXE")
     main_root.attributes("-fullscreen", True)
-    main_root.configure(bg=themes.root_colour)
+    main_root.configure(bg=cfg.root_colour)
     main_root.bind("<F11>", lambda e: toggle_fullscreen(main_root))
-    root_frame = tk.Frame()
-    root_frame.pack(fill="both", expand=True, padx=8, pady=8)
+    root_frame = tk.Frame(bg=cfg.root_colour)
+    root_frame.pack(
+        fill="both",
+        expand=True,
+        padx=cfg.root_pad_x,
+        pady=cfg.root_pad_y)
 
     return root_frame
 
 
 def init_title(root_frame):
 
-    title_frame = tk.Frame(master=root_frame)
-    title_frame.pack(fill="both", expand=True)
+    title_frame = tk.Frame(
+        master=root_frame,
+        bg=cfg.root_colour)
+    title_frame.pack(
+        fill="both",
+        expand=True,
+        padx=cfg.title_pad_x,
+        pady=cfg.title_pad_y)
 
     title = tk.Label(
         master=title_frame,
-        bg=themes.main_title_colour,
+        bg=cfg.main_title_colour,
+        fg=cfg.main_title_text_colour,
         font=fonts["main_title"],
-        text=config.institute_name + " Room Booking",
+        text=cfg.institute_name + " Room Booking",
         anchor="center")
 
     title.pack(fill="both", expand=True)
@@ -48,17 +57,30 @@ def init_title(root_frame):
 def init_table(root_frame, resource_names, timeslots):
 
     print("Initialising table...")
+    padding_frame = tk.Frame(
+        master=root_frame,
+        bg=cfg.table_frame_colour)
+    padding_frame.pack(
+        fill="both",
+        expand=True)
 
-    table_frame = tk.Frame(root_frame)
-    table_frame.pack(fill="both", expand=True)
-    table_frame.rowconfigure(0, weight=1)
-    table_frame.columnconfigure(0, weight=1)
+    table_frame = tk.Frame(
+        master=padding_frame,
+        bg=cfg.table_frame_colour)
+    table_frame.pack(
+        fill="both",
+        expand=True,
+        padx=cfg.table_pad_x,
+        pady=cfg.table_pad_y)
+    table_frame.rowconfigure(0, weight=0)
+    table_frame.columnconfigure(0, weight=0)
 
     def init_timeslots():
 
         print("Initialising timeslots...")
-        frame = tk.Frame(master=table_frame)
-
+        frame = tk.Frame(
+            master=table_frame,
+            bg=cfg.table_frame_colour)
         frame.grid(
             column=0,
             row=0,
@@ -66,19 +88,25 @@ def init_table(root_frame, resource_names, timeslots):
 
         tk.Label(
             master=frame,
-            bg=themes.cell_title_colour,
+            bg=cfg.cell_title_colour,
+            fg=cfg.cell_title_text_colour,
             font=fonts["cell_title"],
             text="Time Slot",
             anchor="center"
-        ).pack(fill="both", expand=True)
+        ).pack(
+            fill="both",
+            expand=True,
+            padx=cfg.cell_pad_x,
+            pady=cfg.cell_pad_y)
 
         timeslot_coords = {}
         count = 1
 
         for timeslot in timeslots:
 
-            frame = tk.Frame(master=table_frame)
-
+            frame = tk.Frame(
+                master=table_frame,
+                bg=cfg.table_frame_colour)
             frame.grid(
                 column=0,
                 row=count,
@@ -86,11 +114,16 @@ def init_table(root_frame, resource_names, timeslots):
 
             tk.Label(
                 master=frame,
-                bg=themes.cell_title_colour,
+                bg=cfg.cell_title_colour,
+                fg=cfg.cell_title_text_colour,
                 font=fonts["cell_title"],
                 text=timeslot,
                 anchor="center"
-            ).pack(fill="both", expand=True)
+            ).pack(
+                fill="both",
+                expand=True,
+                padx=cfg.cell_pad_x,
+                pady=cfg.cell_pad_y)
 
             table_frame.rowconfigure(count, weight=1)
 
@@ -113,8 +146,9 @@ def init_table(root_frame, resource_names, timeslots):
 
             table_frame.columnconfigure(count, weight=1)
 
-            frame = tk.Frame(master=table_frame)
-
+            frame = tk.Frame(
+                master=table_frame,
+                bg=cfg.table_frame_colour)
             frame.grid(
                 column=count,
                 row=0,
@@ -123,10 +157,15 @@ def init_table(root_frame, resource_names, timeslots):
             tk.Label(
                 master=frame,
                 text=resource,
-                bg=themes.cell_colour,
-                font=fonts["cell"],
+                bg=cfg.cell_title_colour,
+                fg=cfg.cell_title_text_colour,
+                font=fonts["cell_title"],
                 anchor="center"
-            ).pack(fill="both", expand=True)
+            ).pack(
+                fill="both",
+                expand=True,
+                padx=cfg.cell_pad_x,
+                pady=cfg.cell_pad_y)
 
             resource_coords[resource] = count
 
@@ -155,18 +194,24 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
             column = resource_coords[resource.name]
             row = timeslot_coords[timeslot]
 
-            frame = tk.Frame(master=table_frame)
+            frame = tk.Frame(
+                master=table_frame,
+                bg=cfg.table_frame_colour)
             frame.grid(column=column, row=row, sticky="nesw")
 
             if resource.bookings[timeslot] == "None":
 
-                tk.Label(
+                booking = tk.Label(
                     master=frame,
                     text="None",
-                    bg=themes.cell_colour,
+                    fg=cfg.cell_text_colour,
                     font=fonts["cell"],
-                    anchor="center"
-                ).pack(fill="both", expand=True)
+                    anchor="center")
+                booking.pack(
+                    fill="both",
+                    expand=True,
+                    padx=cfg.cell_pad_x,
+                    pady=cfg.cell_pad_y)
 
             else:
 
@@ -179,13 +224,22 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
                     for booking in resource.bookings[timeslot]
                 ])
 
-                tk.Label(
+                booking = tk.Label(
                     master=frame,
                     text=cell_contents,
-                    bg=themes.cell_colour,
+                    fg=cfg.cell_text_colour,
                     font=fonts["cell"],
-                    anchor="center"
-                ).pack(fill="both", expand=True)
+                    anchor="center")
+                booking.pack(
+                    fill="both",
+                    expand=True,
+                    padx=cfg.cell_pad_x,
+                    pady=cfg.cell_pad_y)
+
+            if row == 2 or row == 4 or row == 6:
+                booking.configure(bg=cfg.cell_colour2)
+            else:
+                booking.configure(bg=cfg.cell_colour1)
 
     print("Finished initialising bookings.")
 
@@ -199,7 +253,7 @@ def main():
 
     root_frame = init_root()
 
-    fonts = themes.init_fonts()
+    fonts = cfg.init_fonts()
 
     title = init_title(root_frame)
 
