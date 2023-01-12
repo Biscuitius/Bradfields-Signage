@@ -14,7 +14,7 @@ url_codes = {
 
 root_colour = "#DDDDDD"
 main_title_colour = "#FFFFFF"
-table_frame_colour = "#FFFFFF"
+table_frame_colour = "#D9D9D9"
 cell_title_colour = "#75A9D1"
 cell_colour1 = "#FCFCFC"
 cell_colour2 = "#F3F3F3"
@@ -29,12 +29,11 @@ empty_text_colour = "#666666"
 
 root_pad = 7
 frame_pad = 0
-title_pad = 2
 cell_weight = 3
 cell_title_weight = 1
-cell_spacing_vertical = 0
-cell_spacing_horizontal = 2
-cell_title_spacing = False
+cell_gridline_weight_y = 1
+cell_gridline_weight_x = 1
+cell_title_gridlines = True
 
 
 """================= GUI FONTS CONFIG ================="""

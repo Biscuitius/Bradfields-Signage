@@ -52,8 +52,8 @@ def init_title(root_frame):
     title.pack(
         fill="both",
         expand=True,
-        padx=cfg.title_pad,
-        pady=cfg.title_pad)
+        padx=cfg.frame_pad,
+        pady=cfg.frame_pad)
 
     return title
 
@@ -240,7 +240,7 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
 
 
 def add_table_gridlines(table_frame, timeslot_coords, resource_coords):
-    if cfg.cell_spacing_vertical < 1 and cfg.cell_spacing_horizontal < 1:
+    if cfg.cell_gridline_weight_y < 1 and cfg.cell_gridline_weight_x < 1:
         pass
     else:
         last_row = len(list(timeslot_coords.values()))
@@ -249,34 +249,91 @@ def add_table_gridlines(table_frame, timeslot_coords, resource_coords):
         """ Get all cells (including title cells) in the table """
         cell_list = table_frame.winfo_children()
 
-        for cell in cell_list:
-            info = cell.grid_info()
-            row = info["row"]
-            column = info["column"]
+        if cfg.cell_title_gridlines == True:
 
-            if row % 2 == 1:
-                if row == last_row:
+            for cell in cell_list:
+                info = cell.grid_info()
+                row = info["row"]
+                column = info["column"]
+
+                if row == 0:
                     cell.grid(
                         row=row,
                         column=column,
-                        pady=(cfg.cell_spacing_vertical, 0))
+                        pady=(0, cfg.cell_gridline_weight_y))
+                elif row == last_row:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        pady=(cfg.cell_gridline_weight_y, 0))
                 else:
                     cell.grid(
                         row=row,
                         column=column,
-                        pady=cfg.cell_spacing_vertical)
+                        pady=cfg.cell_gridline_weight_y)
 
-            if column % 2 == 1:
-                if column == last_column:
+                if column == 0:
                     cell.grid(
                         row=row,
                         column=column,
-                        padx=(cfg.cell_spacing_horizontal, 0))
+                        padx=(0, cfg.cell_gridline_weight_x))
+                elif column == last_column:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        padx=(cfg.cell_gridline_weight_x, 0))
                 else:
                     cell.grid(
                         row=row,
                         column=column,
-                        padx=cfg.cell_spacing_horizontal)
+                        padx=cfg.cell_gridline_weight_x)
+
+        else:
+
+            for cell in cell_list:
+                info = cell.grid_info()
+                row = info["row"]
+                column = info["column"]
+
+                if row == 0 or column == 0:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        pady=0,
+                        padx=0)
+                elif row == 1:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        pady=(0, cfg.cell_gridline_weight_y))
+                elif row == last_row:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        pady=(cfg.cell_gridline_weight_y, 0))
+                else:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        pady=cfg.cell_gridline_weight_y)
+
+                if column == 0 or row == 0:
+                    pass
+                elif column == 1:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        padx=(0, cfg.cell_gridline_weight_x))
+                elif column == last_column:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        padx=(cfg.cell_gridline_weight_x, 0))
+                else:
+                    cell.grid(
+                        row=row,
+                        column=column,
+                        padx=cfg.cell_gridline_weight_x)
 
 
 def main():
