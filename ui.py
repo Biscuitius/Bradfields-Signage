@@ -1,6 +1,5 @@
 import math
 import tkinter as tk
-import tkinter.font as tkf
 import config as cfg
 from main import resources
 
@@ -192,13 +191,14 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
         # Get the length of the biggest booking list
         biggest_list = 0
         for booking_slot in resource.bookings.values():
-            new_list = len(list(booking_slot))
-            if new_list > biggest_list:
-                biggest_list = new_list
+            if booking_slot != "None":
+                new_list = len(list(booking_slot))
+                if new_list > biggest_list:
+                    biggest_list = new_list
 
         # Calculate how many column splits the resource needs
         if biggest_list > cfg.line_limit:
-            splits = math.ceil(biggest_list / cfg.line_limit) - 1
+            splits = math.ceil(biggest_list / cfg.line_limit)
         else:
             splits = 0
 
@@ -241,71 +241,115 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
 
             # If there ARE bookings for this resource at this time
             else:
-                cell_column = 0
-                cell_row = 0
-                for row in range(cfg.line_limit):
-                    cell_frame.rowconfigure(index=row, weight=1)
-                cell_frame.columnconfigure(index=0, weight=1)
 
                 # Add column splits to separate bookings (if needed)
                 if splits > 0:
-                    divider_column = 2
-                    for i in range(splits):
-                        tk.Frame(
+                    
+                    frames = []
+                    column = 0
+                    
+                    for split in range(splits):
+                        
+                        # Add a frame
+                        frame = tk.Frame(
                             master=cell_frame,
-                            bg=cfg.divider_colour,
-                            width=1
-                        ).grid(
-                            column=divider_column,
+                            bg=colour)
+                        frame.grid(
+                            column=column,
                             row=0,
-                            rowspan=cfg.line_limit,
-                            sticky="ns",
-                            pady=5,
-                            padx=(10, 0))
+                            sticky="nesw")
+                        frames.append(frame)
+                        
+                        # Set the column weights of the frame
+                        for i in range(2):
+                            frame.columnconfigure(
+                                index=i,
+                                weight=1)
 
-                        # Give the next "bookee" column a weight
+                        # Set the row weights of the frame
+                        for i in range(cfg.line_limit):
+                            frame.rowconfigure(
+                                index=i,
+                                weight=1)
+                        
+                        # Give the split column a weight
                         cell_frame.columnconfigure(
-                            index=divider_column+1,
+                            index=column,
                             weight=1)
+                        
+                        column += 1
+                        
+                        # If this is the last split
+                        if split == splits:
+                            pass
+                        else:
+                            # Add a divider
+                            tk.Frame(
+                                master=cell_frame,
+                                bg=cfg.divider_colour,
+                                width=1).grid(
+                                column=column,
+                                row=0,
+                                rowspan=cfg.line_limit,
+                                sticky="ns",
+                                pady=5)
+                            
+                            column += 1
 
-                        divider_column += 3
+                    frame_index = 0
+                    booking_frame = frames[frame_index]
+                    
+                else:
 
+                    booking_frame = cell_frame
+                    
+                    # Give the frame a weight
+                    cell_frame.columnconfigure(
+                        index=0,
+                        weight=1)
+                    
+                cell_column = 0
+                cell_row = 0
+                
                 for booking in resource.bookings[timeslot]:
-
+                    
                     # If we've reached the configured line limit
                     if cell_row > cfg.line_limit-1:
-                        cell_column += 3  # Push 3 columns forward
-                        cell_row = 0  # Go back to row one
+                        cell_row = 0
+                        frame_index += 1
+                        booking_frame = frames[frame_index]
 
                     # The name of the user who made the booking
-                    bookee = (booking + ": ")
                     tk.Label(
-                        master=cell_frame,
-                        text=bookee,
+                        master=booking_frame,
+                        text=booking,
                         fg=cfg.booking_text_colour,
                         bg="red",
                         # bg=colour,
-                        font=fonts["cell"]
+                        font=fonts["cell"],
+                        justify="right",
+                        anchor="e"
                     ).grid(
                         column=cell_column,
                         row=cell_row,
-                        sticky="ne",
-                        padx=(5, 0))
+                        sticky="nesw",)
 
                     # The amount booked by the user
                     quantity = resource.bookings[timeslot][booking]
                     tk.Label(
-                        master=cell_frame,
+                        master=booking_frame,
                         text=quantity,
                         fg=cfg.booking_text_colour,
                         bg="blue",
                         # bg=colour,
                         font=fonts["cell"],
-                        width=5
+                        width=3,
+                        justify="right",
+                        anchor="e"
                     ).grid(
                         column=cell_column+1,
                         row=cell_row,
-                        sticky="new")
+                        sticky="nesw")
 
                     cell_row += 1
 
