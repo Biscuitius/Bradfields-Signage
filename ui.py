@@ -76,8 +76,8 @@ def init_table(root_frame, resource_names, timeslots):
         expand=True,
         padx=cfg.frame_pad,
         pady=cfg.frame_pad)
-    table_frame.rowconfigure(0, weight=cfg.cell_title_weight)
-    table_frame.columnconfigure(0, weight=cfg.cell_title_weight)
+    table_frame.rowconfigure(0, weight=1)
+    table_frame.columnconfigure(0, weight=1)
 
     def init_timeslots():
 
@@ -125,7 +125,7 @@ def init_table(root_frame, resource_names, timeslots):
                 fill="both",
                 expand=True)
 
-            table_frame.rowconfigure(count, weight=cfg.cell_weight)
+            table_frame.rowconfigure(count, weight=1)
 
             timeslot_coords[timeslot] = count
 
@@ -144,7 +144,7 @@ def init_table(root_frame, resource_names, timeslots):
 
         for resource in resource_names:
 
-            table_frame.columnconfigure(count, weight=cfg.cell_weight)
+            table_frame.columnconfigure(count, weight=1)
 
             frame = tk.Frame(
                 master=table_frame,
@@ -185,150 +185,214 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
 
     print("Initialising bookings...")
 
+    # Get resource
     for resource in resources.values():
 
+        # Get timeslot
         for timeslot in resource.bookings:
 
-            column = resource_coords[resource.name]
-            row = timeslot_coords[timeslot]
+            # Get the coordinates of this resource at this timeslot
+            table_column = resource_coords[resource.name]
+            table_row = timeslot_coords[timeslot]
 
-            frame = tk.Frame(
+            # Make every 2nd row a different colour
+            if table_row % 2 == 0:
+                colour = cfg.cell_colour2
+            else:
+                colour = cfg.cell_colour1
+
+            # Create a frame to contain everything in the cell
+            cell_frame = tk.Frame(
                 master=table_frame,
-                bg=cfg.table_frame_colour)
-            frame.grid(column=column, row=row, sticky="nesw")
+                bg=colour)
+            cell_frame.grid(
+                column=table_column,
+                row=table_row,
+                sticky="nesw")
 
+            # If there are no bookings for this resource at this time
             if resource.bookings[timeslot] == "None":
 
+                # Create a label that says "No bookings"
                 booking = tk.Label(
-                    master=frame,
-                    text="None",
+                    master=cell_frame,
+                    text="No bookings",
                     fg=cfg.empty_text_colour,
-                    font=fonts["cell"],
+                    bg=colour,
+                    font=fonts["empty"],
                     anchor="center")
                 booking.pack(
                     fill="both",
                     expand=True)
 
+            # If there ARE bookings for this resource at this time
             else:
+                cell_column = 0
+                cell_row = 0
+                for row in range(cfg.line_limit):
+                    cell_frame.rowconfigure(index=row, weight=1)
 
-                cell_contents = "\n".join([
-                    (
-                        booking
-                        + ": "
-                        + resource.bookings[timeslot][booking]
-                    )
-                    for booking in resource.bookings[timeslot]
-                ])
+                for booking in resource.bookings[timeslot]:
 
-                booking = tk.Label(
-                    master=frame,
-                    text=cell_contents,
-                    fg=cfg.booking_text_colour,
-                    font=fonts["cell"],
-                    anchor="center")
-                booking.pack(
-                    fill="both",
-                    expand=True)
+                    # New column when reaching the configured line limit
+                    if cell_row > cfg.line_limit-1:
+                        cell_row = 0
+                        cell_column += 2
+                        table_frame.columnconfigure(
+                            index=table_column,
+                            weight=cell_column)
 
-            """ Make every 2nd row a different colour """
-            if row % 2 == 0:
-                booking.configure(bg=cfg.cell_colour2)
-            else:
-                booking.configure(bg=cfg.cell_colour1)
+                    # The name of the user who made the booking
+                    bookee = (booking + ": ")
+                    label = tk.Label(
+                        master=cell_frame,
+                        text=bookee,
+                        fg=cfg.booking_text_colour,
+                        bg=colour,
+                        font=fonts["cell"])
+                    label.grid(
+                        column=cell_column,
+                        row=cell_row,
+                        sticky="nsw",
+                        padx=(5, 0))
+
+                    # The amount booked by the user
+                    quantity = resource.bookings[timeslot][booking]
+                    label = tk.Label(
+                        master=cell_frame,
+                        text=quantity,
+                        fg=cfg.booking_text_colour,
+                        bg=colour,
+                        font=fonts["cell"])
+                    label.grid(
+                        column=cell_column + 1,
+                        row=cell_row,
+                        sticky="nsw")
+
+                    cell_row += 1
 
     print("Finished initialising bookings.")
 
 
 def add_table_gridlines(table_frame, timeslot_coords, resource_coords):
+
+    # If the config defines a weight of 0 for both, skip function
     if cfg.cell_gridline_weight_y < 1 and cfg.cell_gridline_weight_x < 1:
         pass
+
     else:
+        # Define the start and end coordinates of the table
         last_row = len(list(timeslot_coords.values()))
         last_column = len(list(resource_coords.values()))
 
-        """ Get all cells (including title cells) in the table """
+        # Get all cells (including title cells) in the table
         cell_list = table_frame.winfo_children()
 
+        # If title padding is enabled in the config
         if cfg.cell_title_gridlines == True:
-
             for cell in cell_list:
+
+                # Get the cell coordinates in the table
                 info = cell.grid_info()
                 row = info["row"]
                 column = info["column"]
 
+                # If the cell is a title cell, only pad the bottom
                 if row == 0:
                     cell.grid(
                         row=row,
                         column=column,
                         pady=(0, cfg.cell_gridline_weight_y))
+
+                # If the cell is at the bottom of the table, only pad the top
                 elif row == last_row:
                     cell.grid(
                         row=row,
                         column=column,
                         pady=(cfg.cell_gridline_weight_y, 0))
+
+                # If the cell is in the middle, pad the top and bottom
                 else:
                     cell.grid(
                         row=row,
                         column=column,
                         pady=cfg.cell_gridline_weight_y)
 
+                # If the cell is a title cell, only pad the right
                 if column == 0:
                     cell.grid(
                         row=row,
                         column=column,
                         padx=(0, cfg.cell_gridline_weight_x))
+
+                # If the cell is at the end of the table, only pad the left
                 elif column == last_column:
                     cell.grid(
                         row=row,
                         column=column,
                         padx=(cfg.cell_gridline_weight_x, 0))
+
+                # If the cell is somewhere in the middle, pad left and right
                 else:
                     cell.grid(
                         row=row,
                         column=column,
                         padx=cfg.cell_gridline_weight_x)
 
+        # If title padding is not enabled in the config
         else:
 
             for cell in cell_list:
+
+                # Get the cell coordinates in the table
                 info = cell.grid_info()
                 row = info["row"]
                 column = info["column"]
 
+                # If the cell is a title or end cell, do not pad
                 if row == 0 or column == 0:
-                    cell.grid(
-                        row=row,
-                        column=column,
-                        pady=0,
-                        padx=0)
+                    pass
+
+                # If the cell underneath a title cell, only pad the bottom
                 elif row == 1:
                     cell.grid(
                         row=row,
                         column=column,
                         pady=(0, cfg.cell_gridline_weight_y))
+
+                # If the cell is on the end row, only pad the top
                 elif row == last_row:
                     cell.grid(
                         row=row,
                         column=column,
                         pady=(cfg.cell_gridline_weight_y, 0))
+
+                # If the cell is in the middle, pad top and bottom
                 else:
                     cell.grid(
                         row=row,
                         column=column,
                         pady=cfg.cell_gridline_weight_y)
 
+                # If the cell is a title or end cell, do not pad
                 if column == 0 or row == 0:
                     pass
+
+                # If the cell next to a title cell, only pad the right
                 elif column == 1:
                     cell.grid(
                         row=row,
                         column=column,
                         padx=(0, cfg.cell_gridline_weight_x))
+
+                # If the cell is on the end column, only pad the left
                 elif column == last_column:
                     cell.grid(
                         row=row,
                         column=column,
                         padx=(cfg.cell_gridline_weight_x, 0))
+
+                # If the cell is in the middle, pad left and right
                 else:
                     cell.grid(
                         row=row,
