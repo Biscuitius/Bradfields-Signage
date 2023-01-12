@@ -1,3 +1,4 @@
+import math
 import tkinter as tk
 import tkinter.font as tkf
 import config as cfg
@@ -188,6 +189,19 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
     # Get resource
     for resource in resources.values():
 
+        # Get the length of the biggest booking list
+        biggest_list = 0
+        for booking_slot in resource.bookings.values():
+            new_list = len(list(booking_slot))
+            if new_list > biggest_list:
+                biggest_list = new_list
+
+        # Calculate how many column splits the resource needs
+        if biggest_list > cfg.line_limit:
+            splits = math.ceil(biggest_list / cfg.line_limit) - 1
+        else:
+            splits = 0
+
         # Get timeslot
         for timeslot in resource.bookings:
 
@@ -214,14 +228,14 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
             if resource.bookings[timeslot] == "None":
 
                 # Create a label that says "No bookings"
-                booking = tk.Label(
+                tk.Label(
                     master=cell_frame,
                     text="No bookings",
                     fg=cfg.empty_text_colour,
                     bg=colour,
                     font=fonts["empty"],
-                    anchor="center")
-                booking.pack(
+                    anchor="center"
+                ).pack(
                     fill="both",
                     expand=True)
 
@@ -231,43 +245,67 @@ def init_bookings(table_frame, resources, timeslot_coords, resource_coords):
                 cell_row = 0
                 for row in range(cfg.line_limit):
                     cell_frame.rowconfigure(index=row, weight=1)
+                cell_frame.columnconfigure(index=0, weight=1)
+
+                # Add column splits to separate bookings (if needed)
+                if splits > 0:
+                    divider_column = 2
+                    for i in range(splits):
+                        tk.Frame(
+                            master=cell_frame,
+                            bg=cfg.divider_colour,
+                            width=1
+                        ).grid(
+                            column=divider_column,
+                            row=0,
+                            rowspan=cfg.line_limit,
+                            sticky="ns",
+                            pady=5,
+                            padx=(10, 0))
+
+                        # Give the next "bookee" column a weight
+                        cell_frame.columnconfigure(
+                            index=divider_column+1,
+                            weight=1)
+
+                        divider_column += 3
 
                 for booking in resource.bookings[timeslot]:
 
-                    # New column when reaching the configured line limit
+                    # If we've reached the configured line limit
                     if cell_row > cfg.line_limit-1:
-                        cell_row = 0
-                        cell_column += 2
-                        table_frame.columnconfigure(
-                            index=table_column,
-                            weight=cell_column)
+                        cell_column += 3  # Push 3 columns forward
+                        cell_row = 0  # Go back to row one
 
                     # The name of the user who made the booking
                     bookee = (booking + ": ")
-                    label = tk.Label(
+                    tk.Label(
                         master=cell_frame,
                         text=bookee,
                         fg=cfg.booking_text_colour,
-                        bg=colour,
-                        font=fonts["cell"])
-                    label.grid(
+                        bg="red",
+                        # bg=colour,
+                        font=fonts["cell"]
+                    ).grid(
                         column=cell_column,
                         row=cell_row,
-                        sticky="nsw",
+                        sticky="ne",
                         padx=(5, 0))
 
                     # The amount booked by the user
                     quantity = resource.bookings[timeslot][booking]
-                    label = tk.Label(
+                    tk.Label(
                         master=cell_frame,
                         text=quantity,
                         fg=cfg.booking_text_colour,
-                        bg=colour,
-                        font=fonts["cell"])
-                    label.grid(
-                        column=cell_column + 1,
+                        bg="blue",
+                        # bg=colour,
+                        font=fonts["cell"],
+                        width=5
+                    ).grid(
+                        column=cell_column+1,
                         row=cell_row,
-                        sticky="nsw")
+                        sticky="new")
 
                     cell_row += 1
 
